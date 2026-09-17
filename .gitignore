@@ -3,3 +3,6 @@ install/
 *.bin
 
 .vscode/
+
+# FreeRTOS-Kernel is cloned in as its own repo (sophgo/FreeRTOS-Kernel) by the SDK
+/Source/
