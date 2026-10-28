@@ -19,6 +19,9 @@
 
 #include "comm.h"
 #include "cvi_spinlock.h"
+#ifdef TIDESENSE_C906_RELOAD
+#include "../../../../../../scripts/c906/firmware.h"
+#endif
 
 //#define __DEBUG__
 
@@ -108,9 +111,16 @@ TASK_CTX_S gTaskCtx[E_QUEUE_MAX] = {
 	},
 };
 
+#ifdef TIDESENSE_C906_RELOAD
+/* IRQs can arrive before the command task runs after a warm start. */
+volatile struct mailbox_set_register *mbox_reg = (void *)MAILBOX_REG_BASE;
+volatile struct mailbox_done_register *mbox_done_reg = (void *)(MAILBOX_REG_BASE + 2);
+volatile unsigned long *mailbox_context = (void *)MAILBOX_REG_BUFF;
+#else
 volatile struct mailbox_set_register *mbox_reg;
 volatile struct mailbox_done_register *mbox_done_reg;
 volatile unsigned long *mailbox_context; // mailbox buffer context is 64 Bytess
+#endif
 
 /****************************************************************************
  * Function definitions
@@ -201,11 +211,24 @@ void prvCmdQuRunTask(void *pvParameters)
 
 	cvi_spinlock_init();
 	printf("prvCmdQuRunTask run\n");
+#ifdef TIDESENSE_C906_RELOAD
+    c906_reload_ready();
+#endif
 
 	for (;;) {
 		xQueueReceive(gTaskCtx[E_QUEUE_CMDQU].queHandle, &rtos_cmdq, portMAX_DELAY);
 
 		switch (rtos_cmdq.cmd_id) {
+#ifdef TIDESENSE_C906_RELOAD
+            case C906_RELOAD_CAP_CMD:
+                rtos_cmdq.param_ptr = C906_RELOAD_MAGIC;
+                goto send_label;
+            case C906_RELOAD_PARK_CMD:
+                c906_firmware_reload_enter((uintptr_t)rtos_cmdq.param_ptr);
+                rtos_cmdq.param_ptr = 0;
+                goto send_label;
+#endif
+
 #if ( configUSE_TRACE_FACILITY == 1 )
 			case SYS_CMD_INFO_TRACE_SNAPSHOT_START:
 				debug_printf("SYS_CMD_INFO_TRACE_SNAPSHOT_START\n");

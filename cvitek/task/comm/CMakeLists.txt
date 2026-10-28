@@ -17,3 +17,9 @@ include_directories(${CMAKE_INSTALL_INC_PREFIX}/hal/config)
 add_library(comm STATIC ${_SOURCES})
 install(TARGETS comm DESTINATION lib)
 
+
+# TideSense debug features are explicitly enabled by scripts/c906/build.sh.
+option(TIDESENSE_C906_RELOAD "Enable cooperative C906 firmware RAM reload" OFF)
+if(TIDESENSE_C906_RELOAD)
+    target_compile_definitions(comm PRIVATE TIDESENSE_C906_RELOAD)
+endif()
