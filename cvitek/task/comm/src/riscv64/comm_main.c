@@ -22,6 +22,11 @@
 #ifdef TIDESENSE_C906_RELOAD
 #include "../../../../../../scripts/c906/firmware.h"
 #endif
+#ifdef TIDESENSE_C906_TPU_PROBE
+#include "arch_helpers.h"
+#include "arch_time.h"
+#include "../../../../../../scripts/vio-compare/probes/c906-tpu/firmware.c"
+#endif
 
 //#define __DEBUG__
 
@@ -227,6 +232,15 @@ void prvCmdQuRunTask(void *pvParameters)
                 c906_firmware_reload_enter((uintptr_t)rtos_cmdq.param_ptr);
                 rtos_cmdq.param_ptr = 0;
                 goto send_label;
+#endif
+#ifdef TIDESENSE_C906_TPU_PROBE
+            case TPU_PROBE_CMD: {
+                uintptr_t addr = (uintptr_t)rtos_cmdq.param_ptr;
+                if (addr >= 0x80000000u && !(addr & 63u) &&
+                    addr <= 0x8ff40000u - TPU_PROBE_BYTES)
+                    c906_tpu_probe(addr);
+                goto send_label;
+            }
 #endif
 
 #if ( configUSE_TRACE_FACILITY == 1 )

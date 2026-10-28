@@ -20,6 +20,10 @@ install(TARGETS comm DESTINATION lib)
 
 # TideSense debug features are explicitly enabled by scripts/c906/build.sh.
 option(TIDESENSE_C906_RELOAD "Enable cooperative C906 firmware RAM reload" OFF)
+option(TIDESENSE_C906_TPU_PROBE "Enable standalone C906 TPU access experiment" OFF)
 if(TIDESENSE_C906_RELOAD)
     target_compile_definitions(comm PRIVATE TIDESENSE_C906_RELOAD)
+endif()
+if(TIDESENSE_C906_TPU_PROBE)
+    target_compile_definitions(comm PRIVATE TIDESENSE_C906_TPU_PROBE)
 endif()
