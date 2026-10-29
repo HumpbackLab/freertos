@@ -100,7 +100,11 @@ TASK_CTX_S gTaskCtx[E_QUEUE_MAX] = {
 	},
 	{
 		.name = "CMDQU",
+#ifdef TIDESENSE_C906_FRONTEND
+		.stack_size = configMINIMAL_STACK_SIZE*2,
+#else
 		.stack_size = configMINIMAL_STACK_SIZE,
+#endif
 		.priority = tskIDLE_PRIORITY + 5,
 		.runTask = prvCmdQuRunTask,
 		.queLength = 30,
