@@ -7,5 +7,6 @@ void *memset(void *dest, int value, unsigned long size)
     for(int i = 0 ; i < size; i++) {
         *pd++ = (char) value;
     }
+    return dest;
 }
 
