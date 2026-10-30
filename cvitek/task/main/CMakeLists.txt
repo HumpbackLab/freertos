@@ -47,8 +47,11 @@ link_directories("${TOP_DIR}/install/lib")
 add_executable(cvirtos.elf ${_SOURCES})
 
 # Reserve room for the optional debug reload hook in the 768 KiB carveout.
-# Task heaps retain their normal size; only the boot stack changes 128 -> 120 KiB.
-if(TIDESENSE_C906_FRONTEND)
+# Task heaps retain their normal size. Boot stack: reload 120 KiB,
+# frontend 96 KiB, experimental frontend + IVE 88 KiB.
+if(TIDESENSE_C906_FRONT_IVE_HIST OR TIDESENSE_C906_FRONT_IVE_ST)
+    target_link_options(cvirtos.elf PRIVATE "-Wl,--defsym=_STACK_SIZE=0x16000")
+elseif(TIDESENSE_C906_FRONTEND)
     target_link_options(cvirtos.elf PRIVATE "-Wl,--defsym=_STACK_SIZE=0x18000")
 elseif(TIDESENSE_C906_RELOAD)
     target_link_options(cvirtos.elf PRIVATE "-Wl,--defsym=_STACK_SIZE=0x1e000")
